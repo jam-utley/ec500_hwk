@@ -61,6 +61,11 @@ def matrix_to_list(args, I, display = False):
     I_list = np.zeros((I.shape[0] * I.shape[1], 5))
 
     #### Your job 1 starts here: ####
+    for i in range(I.shape[0]):
+        for j in range(I.shape[1]):
+            #save n,m,R,G,B
+            I_list[i,j]=(i,j,I[i,j,0],I[i,j,1],I[i,j,2])
+            continue
 
     #### Your job 1 ends here: ####
 
@@ -181,6 +186,8 @@ def transformation_mat_1(args):
     transformation_mat = np.zeros((3, 3))
 
     #### Your job 2 starts here ####
+    
+    #Translation * Rotation * Scaling
 
     #### Your job 2 starts here ####
 
@@ -201,8 +208,16 @@ def transformation_mat_2(args):
     transformation_mat = np.zeros((3, 3))
 
     #### Your job 3 starts here ####
-
-    #### Your job 3 starts here ####
+    
+    #Translation to the origin
+    
+    #Mult by rotation matrix
+    
+    #Mult by Scaling matrix
+    
+    #Translation back
+    
+    #### Your job 3 ends here ####
 
     return transformation_mat
 
