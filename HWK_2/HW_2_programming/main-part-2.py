@@ -56,7 +56,9 @@ def load_kernel(args):
 
     if args.kernel == "binomial":
         #### Your job 1.2 starts here: implement the 5-by-5 2D binomial filter (see textbook/lecture slides for details) ####
-        kernel = np.zeros((5, 5)) # this is a placeholder, and you can remove this line completely
+        #kernel = np.zeros((5, 5)) # this is a placeholder, and you can remove this line completely
+        binomial_5 = np.array([1,4,6,4,1])
+        kernel = np.outer(binomial_5,binomial_5)
 
         kernel = kernel / np.sum(kernel) # keep this line to make your filter properly normalized
         #### Your job 1.2 ends here: implement the 5-by-5 2D binomial filter ####
@@ -87,11 +89,17 @@ def Convolution(args, I, kernel):
     #### Your job 1.0 ends here: zero padding (just read the code) ####
 
     #### Your job 1.1 starts here: convolution (you may add just one more line without for loops; the fewer for loops you have; the faster the code runs) ####
+    #Vectorize kernel
+    #kernel_vec = np.vectorize(kernel)
     for c in range(I_pad.shape[2]):
         for n in range(I_out.shape[0]):
             for m in range(I_out.shape[1]):
-
-                # Please fill in I_out
+                # Vectorize the region of I_pad being convolved
+                #I_pad_convolved = np.vectorize(I_pad[n-1:n+2, m-1:m+2])
+                # I_out = dot product between vectorized kernel and vectorized
+                # I_pad region being convolved
+                #Flip kernel so convolution is legitimate
+                I_out = np.sum(I_pad[n-1:n+2, m-1:m+2] * kernel[::-1,::-1])
 
     #### Your job 1.1 ends here: convolution ####
 
@@ -124,7 +132,10 @@ def Downsampling(args, I, kernel):
     """
 
     #### Your job 2 starts here: downsampling ####
-
+    
+    # Convolve I with the binomial filter Convolution() function
+    
+    # Sub sample by factor of 2 (keep every even pixel)
 
     #### Your job 2 ends here: downsampling ####
 
@@ -145,6 +156,12 @@ def Upsampling(args, I, kernel):
 
     #### Your job 4 starts here: upsampling ####
 
+    # Double size of I in each dimension (2D)
+    # I_up[n,m,:]=4 * I[n/2,m/2,:]
+    
+    # NB : I+up[n,m,:] = 0 for odd indicies
+    
+    # Convolve 2D binomial filter with binomial filter to obtain I_convolved
 
     #### Your job 4 ends here: upsampling ####
 
@@ -169,7 +186,10 @@ def Gaussian_pyramid(args, I, kernel, scale):
     print("Perform downsampling")
     for n in range(scale):
     #### Your job 3 starts here: create the n-th downsampled image ####
-
+        # Output[n] is always one behind the appended value so there's no issue with indexing
+        temp_I = Downsampling(args, Output[n], kernel)
+        # Appends downsampled I to the output list
+        Output.append(temp_I)
 
     #### Your job 3 starts here: create the n-th downsampled image ####
 
@@ -210,7 +230,10 @@ def Laplacian_pyramid(args, G_pyramid, kernel, scale):
     print("Computing the residual")
     for n in range(scale):
     #### Your job 5 starts here: create the n-th residual image ####
-
+    
+    # Downsample - Upsample = Residual
+    
+    # Make 1 residual per sampling step.
 
     #### Your job 5 starts here: create the n-th residual image ####
 
@@ -250,6 +273,7 @@ def Image_reconstruction(args, I_small, L_pyramid, kernel, scale):
     for n in range(scale):
     #### Your job 6 starts here: reconstruct the original image ####
 
+    # Upsample + Residual (Laplacian pyramid index) = image reconstruction
 
     #### Your job 6 starts here: reconstruct the original image ####
 

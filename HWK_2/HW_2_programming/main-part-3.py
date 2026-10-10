@@ -22,6 +22,14 @@ def Periodic_basis(args, N, u_freq, v_freq, phase):
     """
 
     #### Your job 1 starts here ####
+    # Gives a range from -15 to 15
+    n_list = list(range(-(N-1)/2,(N-1)/2))
+    m_list = list(range(-(N-1)/2,(N-1)/2))
+    I = np.zeros((N,N))
+    
+    for i,n in enumerate(n_list):
+        for j,m in enumerate(m_list):
+            I[i,j] = np.cos(2*np.pi*((u_freq*n)/N)+((v_freq*m/N))+phase)
 
 
     #### Your job 1 ends here ####
