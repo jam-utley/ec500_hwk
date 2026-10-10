@@ -107,7 +107,20 @@ def forward_mapping(args, I, transformation_mat):
 
     #### Your job 4 starts here: forward_mapping ####
     # Please use the function matrix_to_list
-
+    # Stores matrix with index of each pixel
+    matrix_list = matrix_to_list(I)
+    
+    for i in matrix_list:
+        p = np.array([i[0],i[1], 1])
+        #Apply transformation matrix to the position array
+        new_p = transformation_mat @ p
+        #Rounds to nearest integer
+        new_p = np.round(new_p).astype(int)
+        #new transformed locations
+        n_new = new_p[0]
+        m_new = new_p[1]
+        #Assigns pixel values to new transformed location
+        I_out[n_new,m_new] = [i[2],i[3],i[4]]
 
     #### Your job 4 ends here: forward_mapping ####
 
@@ -148,7 +161,25 @@ def backward_mapping(args, I, transformation_mat):
 
     #### Your job 5 starts here: backward_mapping ####
     # Please use the function matrix_to_list
+    matrix_list = matrix_to_list(I)
+    #Outputs (n,m,R,G,B) for every pixel
+    
+    #compute inverse of transformation matrix
+    inv_transf_mat = np.linalg.inv(transformation_mat)
+    for i in matrix_list:
+        p = np.array([i[0],i[1], 1])
+        #Apply transformation matrix to the position array
+        new_p = inv_transf_mat @ p
+        #Rounds to nearest integer
+        new_p = np.round(new_p).astype(int)
+        #new transformed locations
+        n_new = new_p[0]
+        m_new = new_p[1]
+        #Assigns pixel values to new transformed location
+        
+        I_out[n_new,m_new] = [i[2],i[3],i[4]]
 
+    #DOUBLE CHECK THIS FUNCTIONALITY
 
     #### Your job 5 ends here: backward_mapping ####
 
@@ -188,6 +219,21 @@ def transformation_mat_1(args):
     #### Your job 2 starts here ####
     
     #Translation * Rotation * Scaling
+    translation_mat = np.array(((1,0,2),
+                                (0,1,5),
+                                (0,0,1)))
+    
+    rotate_deg = 10
+    rotate_radians = np.radians(rotate_deg)
+    rotation_mat    = np.array(((np.cos(rotate_radians),-np.sin(rotate_radians),0),
+                                (np.sin(rotate_radians), np.cos(rotate_radians),0),
+                                (0, 0, 1)))
+    
+    scale_mat = np.array(((0.8,0,0),
+                          (0,1.2,0)
+                          (0,0,1)))
+    
+    transformation_mat = translation_mat @ rotation_mat @ scale_mat
 
     #### Your job 2 starts here ####
 
@@ -210,12 +256,27 @@ def transformation_mat_2(args):
     #### Your job 3 starts here ####
     
     #Translation to the origin
+    trans_start = np.array(((1,0,-250),
+                            (0,1,-250),
+                            (0,0,   1)))
     
     #Mult by rotation matrix
+    rotate_rads = np.pi/4
+    rotation_mat = np.array(((np.cos(rotate_rads),-np.sin(rotate_rads),0),
+                             (np.sin(rotate_rads), np.cos(rotate_rads),0),
+                             (0,0,1)))
     
     #Mult by Scaling matrix
-    
+    scale_mat = np.array(((1.6,  0,0),
+                          (0,  1.2,0),
+                          (0,    0,1)))
+
     #Translation back
+    trans_back = np.array(((1,0,250),
+                           (0,1,250),
+                           (0,0,  1)))
+    
+    transformation_mat = trans_start @ rotation_mat @ scale_mat @ trans_back
     
     #### Your job 3 ends here ####
 
