@@ -133,9 +133,24 @@ def Downsampling(args, I, kernel):
 
     #### Your job 2 starts here: downsampling ####
     
+    # initiate output
+    N = int(I.shape[0])
+    M = int(I.shape[1])
+    I_out = np.zeros((N/2,M/2,I.shape[2]))
+    
     # Convolve I with the binomial filter Convolution() function
+    temp_I = Convolution(args, I, kernel)
     
     # Sub sample by factor of 2 (keep every even pixel)
+    for i in range(N):
+        if i%2==0:
+            for j in range(M):
+                if j%2==0:
+                    I_out[i,j,:]=temp_I[i,j,:]
+                else:
+                    continue
+        else:
+            continue
 
     #### Your job 2 ends here: downsampling ####
 
@@ -156,12 +171,23 @@ def Upsampling(args, I, kernel):
 
     #### Your job 4 starts here: upsampling ####
 
+    N = I.shape[0]
+    M = I.shape[1]
+
     # Double size of I in each dimension (2D)
-    # I_up[n,m,:]=4 * I[n/2,m/2,:]
-    
-    # NB : I+up[n,m,:] = 0 for odd indicies
+    # I_out[n,m,:]=4 * I[n/2,m/2,:] for EVEN indices only. 0 otherwise
+    for i in range(N):
+        if i%2==0:
+            for j in range(M):
+                if j%2==0:
+                    I_out[i,j,:]=I[i,j,:]
+                else:
+                    continue
+        else:
+            continue
     
     # Convolve 2D binomial filter with binomial filter to obtain I_convolved
+    I_out = Convolution(args, I_out, kernel)
 
     #### Your job 4 ends here: upsampling ####
 
@@ -230,10 +256,14 @@ def Laplacian_pyramid(args, G_pyramid, kernel, scale):
     print("Computing the residual")
     for n in range(scale):
     #### Your job 5 starts here: create the n-th residual image ####
-    
-    # Downsample - Upsample = Residual
-    
-    # Make 1 residual per sampling step.
+        # Original - (Downsample(Upsample(original)) = Residual
+        # We have already computed the downsample in the G_pyramid
+        # so we only need to calculate the upsample fo the next G_pyramid
+        # index.
+        # Gaussian pyramid already contains the downsampled images
+        upsample = Upsampling(args, G_pyramid[n+1], kernel)
+        Output[n] = G_pyramid[n] - upsample
+        # Make 1 residual per sampling step.
 
     #### Your job 5 starts here: create the n-th residual image ####
 
@@ -272,8 +302,10 @@ def Image_reconstruction(args, I_small, L_pyramid, kernel, scale):
     Output = I_small
     for n in range(scale):
     #### Your job 6 starts here: reconstruct the original image ####
-
-    # Upsample + Residual (Laplacian pyramid index) = image reconstruction
+        # Upsample + Residual (Laplacian pyramid index) = image reconstruction
+        upsample = Upsampling(args, Output, kernel)
+        # negative index n so that it goes from the smallest to the biggest
+        Output = upsample + L_pyramid[-n]
 
     #### Your job 6 starts here: reconstruct the original image ####
 
