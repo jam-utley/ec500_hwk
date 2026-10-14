@@ -64,8 +64,11 @@ def matrix_to_list(args, I, display = False):
     for i in range(I.shape[0]):
         for j in range(I.shape[1]):
             #save n,m,R,G,B
-            I_list[i,j]=(i,j,I[i,j,0],I[i,j,1],I[i,j,2])
-            continue
+            k = i*I.shape[1] + j
+            I_list[k] = (i,j,I[i,j,0],I[i,j,1],I[i,j,2])
+            #I_list[i,j]=(i,j,I[i,j,0],I[i,j,1],I[i,j,2])
+            #continue
+    
 
     #### Your job 1 ends here: ####
 
@@ -108,7 +111,7 @@ def forward_mapping(args, I, transformation_mat):
     #### Your job 4 starts here: forward_mapping ####
     # Please use the function matrix_to_list
     # Stores matrix with index of each pixel
-    matrix_list = matrix_to_list(I)
+    matrix_list = matrix_to_list(args, I)
     
     for i in matrix_list:
         p = np.array([i[0],i[1], 1])
@@ -120,7 +123,8 @@ def forward_mapping(args, I, transformation_mat):
         n_new = new_p[0]
         m_new = new_p[1]
         #Assigns pixel values to new transformed location
-        I_out[n_new,m_new] = [i[2],i[3],i[4]]
+        if 0 <= n_new < I.shape[0] and 0 <= m_new < I.shape[1]:
+            I_out[n_new,m_new] = [i[2],i[3],i[4]]
 
     #### Your job 4 ends here: forward_mapping ####
 
@@ -161,12 +165,14 @@ def backward_mapping(args, I, transformation_mat):
 
     #### Your job 5 starts here: backward_mapping ####
     # Please use the function matrix_to_list
-    matrix_list = matrix_to_list(I)
+    matrix_list = matrix_to_list(args, I)
     #Outputs (n,m,R,G,B) for every pixel
     
     #compute inverse of transformation matrix
     inv_transf_mat = np.linalg.inv(transformation_mat)
     for i in matrix_list:
+        n = int(i[0])
+        m = int(i[1])
         p = np.array([i[0],i[1], 1])
         #Apply transformation matrix to the position array
         new_p = inv_transf_mat @ p
@@ -176,10 +182,9 @@ def backward_mapping(args, I, transformation_mat):
         n_new = new_p[0]
         m_new = new_p[1]
         #Assigns pixel values to new transformed location
-        
-        I_out[n_new,m_new] = [i[2],i[3],i[4]]
-
-    #DOUBLE CHECK THIS FUNCTIONALITY
+        if 0 <= n_new < I.shape[0] and 0 <= m_new < I.shape[1]:
+            #print(f"n_new : {n_new}, m_new : {m_new}, n : {i[0]}, m : {i[1]}")
+            I_out[n,m] = I[n_new,m_new]
 
     #### Your job 5 ends here: backward_mapping ####
 
@@ -223,17 +228,18 @@ def transformation_mat_1(args):
                                 (0,1,5),
                                 (0,0,1)))
     
-    rotate_deg = 10
+    rotate_deg = -10
     rotate_radians = np.radians(rotate_deg)
+    #print(rotate_radians)
     rotation_mat    = np.array(((np.cos(rotate_radians),-np.sin(rotate_radians),0),
                                 (np.sin(rotate_radians), np.cos(rotate_radians),0),
                                 (0, 0, 1)))
     
     scale_mat = np.array(((0.8,0,0),
-                          (0,1.2,0)
+                          (0,1.2,0),
                           (0,0,1)))
     
-    transformation_mat = translation_mat @ rotation_mat @ scale_mat
+    transformation_mat = scale_mat @ rotation_mat @ translation_mat
 
     #### Your job 2 starts here ####
 
@@ -276,7 +282,7 @@ def transformation_mat_2(args):
                            (0,1,250),
                            (0,0,  1)))
     
-    transformation_mat = trans_start @ rotation_mat @ scale_mat @ trans_back
+    transformation_mat = trans_back @ scale_mat @ rotation_mat @  trans_start
     
     #### Your job 3 ends here ####
 

@@ -91,6 +91,8 @@ def Convolution(args, I, kernel):
     #### Your job 1.1 starts here: convolution (you may add just one more line without for loops; the fewer for loops you have; the faster the code runs) ####
     #Vectorize kernel
     #kernel_vec = np.vectorize(kernel)
+    D = 2*R + 1
+    K = kernel[::-1,::-1]
     for c in range(I_pad.shape[2]):
         for n in range(I_out.shape[0]):
             for m in range(I_out.shape[1]):
@@ -99,7 +101,7 @@ def Convolution(args, I, kernel):
                 # I_out = dot product between vectorized kernel and vectorized
                 # I_pad region being convolved
                 #Flip kernel so convolution is legitimate
-                I_out = np.sum(I_pad[n-1:n+2, m-1:m+2] * kernel[::-1,::-1])
+                I_out[n,m,c] = np.sum(I_pad[n:n+D, m:m+D, c] * K)
 
     #### Your job 1.1 ends here: convolution ####
 
@@ -136,7 +138,9 @@ def Downsampling(args, I, kernel):
     # initiate output
     N = int(I.shape[0])
     M = int(I.shape[1])
-    I_out = np.zeros((N/2,M/2,I.shape[2]))
+    C = (I.shape[2])
+    #print(f"N : {N}, M : {M}, C : {C}")
+    I_out = np.zeros((N//2,M//2,C)) # Two slashes so it does integer division not float division
     
     # Convolve I with the binomial filter Convolution() function
     temp_I = Convolution(args, I, kernel)
@@ -146,7 +150,8 @@ def Downsampling(args, I, kernel):
         if i%2==0:
             for j in range(M):
                 if j%2==0:
-                    I_out[i,j,:]=temp_I[i,j,:]
+                    #print(i,j)
+                    I_out[i//2,j//2,:]=temp_I[i,j,:]
                 else:
                     continue
         else:
@@ -171,23 +176,24 @@ def Upsampling(args, I, kernel):
 
     #### Your job 4 starts here: upsampling ####
 
-    N = I.shape[0]
-    M = I.shape[1]
+    #N = I.shape[0]
+    #M = I.shape[1]
 
     # Double size of I in each dimension (2D)
     # I_out[n,m,:]=4 * I[n/2,m/2,:] for EVEN indices only. 0 otherwise
-    for i in range(N):
-        if i%2==0:
-            for j in range(M):
-                if j%2==0:
-                    I_out[i,j,:]=I[i,j,:]
-                else:
-                    continue
-        else:
-            continue
+    #for i in range(N):
+        #if i%2==0:
+            #for j in range(M):
+                #if j%2==0:
+                    #I_out[i,j,:]=I[i,j,:]
+               # else:
+                    #continue
+        #else:#
+           # continue
     
     # Convolve 2D binomial filter with binomial filter to obtain I_convolved
-    I_out = Convolution(args, I_out, kernel)
+    I_out[::2,::2, :] = I
+    I_out = 4 * Convolution(args, I_out, kernel)
 
     #### Your job 4 ends here: upsampling ####
 
@@ -215,7 +221,7 @@ def Gaussian_pyramid(args, I, kernel, scale):
         # Output[n] is always one behind the appended value so there's no issue with indexing
         temp_I = Downsampling(args, Output[n], kernel)
         # Appends downsampled I to the output list
-        Output.append(temp_I)
+        Output[n+1] = temp_I
 
     #### Your job 3 starts here: create the n-th downsampled image ####
 
@@ -305,7 +311,7 @@ def Image_reconstruction(args, I_small, L_pyramid, kernel, scale):
         # Upsample + Residual (Laplacian pyramid index) = image reconstruction
         upsample = Upsampling(args, Output, kernel)
         # negative index n so that it goes from the smallest to the biggest
-        Output = upsample + L_pyramid[-n]
+        Output = upsample + L_pyramid[scale - 1 - n]
 
     #### Your job 6 starts here: reconstruct the original image ####
 
