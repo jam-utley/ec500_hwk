@@ -34,6 +34,24 @@ def resize_image_and_boxes(image_path, boxes):
 
     #### Your job 1 starts here ####
 
+    #resize image
+    image = Image.resize(size:(TARGET_SIZE,TARGET_SIZE))
+    #resize boxes
+
+    for i in range(len(boxes)):
+        x = boxes[i][0]
+        y = boxes[i][1]
+        w = boxes[i][2]
+        h = boxes[i][3]
+        width_ratio = TARGET_SIZE/w
+        height_ratio = TARGET_SIZE/h
+
+        x_new = x * width_ratio
+        y_new = y * height_ratio
+        w_resized = w * width_ratio
+        h_resized = h * height_ratio
+
+        resized_boxes.append([x_new,y_new,w_resized,h_resized])
     #### Your job 1 ends here ####
 
     return image, resized_boxes
@@ -56,7 +74,16 @@ def compute_patch_grid():
         for j in range(GRID_NUMBER):    # j: row index (y-direction, bottom-up)
 
             #### Your job 1 starts here
-            pass
+            #Here GRID_NUMBER is 200/20 = 10. So grid will be 10x10 patches. Not hardcoded, just good to know.
+            #pass
+            #x_center = halfway between grid number + GRID_NUMBER*j
+            #y_center = halfway between grid number + GRID_NUMBER*i
+            #are w and h correct here?
+            w = GRID_NUMBER
+            h = GRID_NUMBER
+            x_center = GRID_NUMBER/2 + GRID_NUMBER*j
+            y_center = GRID_NUMBER/2 + GRID_NUMBER*i
+            grid.append([i,j,x_center,y_center,w,h])
             #### Your job 1 ends here ####
 
     return grid
@@ -77,6 +104,14 @@ def boxes_overlap(box1, box2):
     result = True
 
     #### Your job 1 starts here ####
+
+    #Do I do the orientation test here for geometric collisions???
+    #No, I just need to see if two boxes occupy the same grid space.
+    for i in range(GRID_NUMBER):
+        for j in range(GRID_NUMBER):
+            #Check box1 locations
+            #Check box2 locations
+            
 
     #### Your job 1 ends here ####
 
